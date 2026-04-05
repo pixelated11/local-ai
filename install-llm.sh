@@ -8,22 +8,23 @@ else
     exit 1
 fi
 
-echo "Checking if Ollama (for Llama 3-8B) exists..."
-if [ -d /usr/local/lib/ollama ]; then
-    echo "Llama 3-8B exists. Installation not needed. Exiting..."
+echo "Checking if Qwen3 4B is already installed..."
+if ollama list | grep -q "qwen3:4b-q4_K_M"; then
+    echo "Qwen3 4B already installed. Redirecting to GUI..."
     exit 0
 else
-    echo "Llama 3-8B is not installed. Installing now. (Press Ctrl + C to abort)"
+    echo "Qwen3 4B is not installed. Installing now. (Press Ctrl + C to abort)"
 fi
 
-echo "Installing Llama 3-8B..."
+echo "Installing Ollama..."
 sleep 1
 
 if curl -fsSL https://ollama.com/install.sh | sh; then
-    echo "Llama 3-8B installation using Ollama succeeded. Redirecting to GUI..."
-    python program.py
+    echo "Ollama installed. Pulling Qwen3 4B..."
+    ollama pull qwen3:4b-q4_K_M
+    echo "Done! Redirecting to GUI..."
     exit 0
 else
-    echo "Llama 3-8B installation using Ollama failed. Cannot continue local-LLM installation."
+    echo "Installation failed."
     exit 1
 fi
