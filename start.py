@@ -9,6 +9,21 @@ def resource_path(filename):
         return os.path.join(sys._MEIPASS, filename)
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), filename)
 
+def check_ollama():
+    try:
+        result = subprocess.run(["ollama", "list"], capture_output=True, text=True)
+        if "qwen3:4b-q4_K_M" in result.stdout:
+            # Model already installed, go straight to program.py
+            subprocess.run(["python", resource_path("program.py")])
+            sys.exit(0)
+    except FileNotFoundError:
+        # Ollama is not installed at all, show installer window
+        pass
+
+# Check before showing any window
+check_ollama()
+
+# If we reach here, ollama or model is missing, show installer
 app = ctk.CTk()
 app.grid_columnconfigure(0, weight=1)
 
@@ -16,9 +31,15 @@ label = ctk.CTkLabel(app, text="Install Qwen3 4B LLM? Will take 5GB+ space. (Req
 label.grid(row=0, column=0, pady=10, padx=20)
 
 def install_button():
-    script_path = resource_path("install-llm.sh")
-    subprocess.run(["chmod", "+x", script_path])
-    result = subprocess.run(["sudo", script_path])
+    if sys.platform == "win32":
+        script_path = resource_path("install-llm.ps1")
+        result = subprocess.run([
+            "powershell", "-ExecutionPolicy", "Bypass", "-File", script_path
+        ])
+    else:
+        script_path = resource_path("install-llm.sh")
+        subprocess.run(["chmod", "+x", script_path])
+        result = subprocess.run(["sudo", script_path])
 
     if result.returncode == 0:
         app.destroy()
@@ -30,7 +51,7 @@ def abort_button():
     print("Cannot continue LocalAssistant installation. Aborted")
     sys.exit(0)
 
-button = ctk.CTkButton(app, text="Install (Look in terminal, will ask for sudo)", font=ctk.CTkFont("Adwaita Sans", 20), command=install_button)
+button = ctk.CTkButton(app, text="Install (Look in terminal, will ask for sudo/admin)", font=ctk.CTkFont("Adwaita Sans", 20), command=install_button)
 button.grid(row=1, column=0, padx=30, pady=20)
 
 button_abort = ctk.CTkButton(app, text="Cancel", font=ctk.CTkFont("Adwaita Sans", 20), command=abort_button)
