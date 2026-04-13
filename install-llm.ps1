@@ -15,7 +15,7 @@ Write-Host "User is admin."
 
 Write-Host "Checking if Qwen3 4B is already installed..."
 $ollamaList = ollama list 2>&1
-if ($ollamaList -match "qwen3:4b-q4_K_M") {
+if ($ollamaList -match "qwen3:4b") {
     Write-Host "Qwen3 4B already installed. Redirecting to GUI..."
     exit 0
 } else {
@@ -37,7 +37,7 @@ Start-Process -FilePath $installerPath -ArgumentList "/silent" -Wait
 
 if ($LASTEXITCODE -eq 0) {
     Write-Host "Ollama installed. Pulling Qwen3 4B..."
-    ollama pull qwen3:4b-q4_K_M
+    ollama pull qwen3:4b
     Write-Host "Done! Redirecting to GUI..."
     exit 0
 } else {
